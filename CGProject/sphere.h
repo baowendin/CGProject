@@ -10,9 +10,10 @@ class Sphere
 	Material material;
 	float radius;
 	unsigned int VAO, VBO;
+	unsigned int texture;
 	unsigned int uniformBlockIndex;
 	int theta_num = 40, phi_num = 40;
-	std::vector<float> point_attribute;
+	std::vector<Attribute> point_attribute;
 	void init()
 	{
 		std::vector<glm::vec3> points;
@@ -33,26 +34,33 @@ class Sphere
 		for (int phi = 0; phi < phi_num; phi++)
 		{
 			glm::vec3 p[4];
+			glm::vec2 t[4];
 			for (int theta = 0; theta < theta_num; theta++)
 			{
 				p[0] = points[phi * theta_num + theta];
 				p[1] = points[phi * theta_num + (theta + 1) % theta_num];
 				p[2] = points[(phi + 1) * theta_num + (theta + 1) % theta_num];
-				p[3] = points[(phi + 1) * theta_num + theta];		
+				p[3] = points[(phi + 1) * theta_num + theta];	
+
+				t[0] = {(float)theta / theta_num, (float)phi / phi_num};
+				t[1] = {(float)(theta + 1) / theta_num, (float)phi / phi_num};
+				t[2] = {(float)(theta + 1) / theta_num, (float)(phi + 1) / phi_num};
+				t[3] = {(float)theta / theta_num, (float)(phi + 1) / phi_num};
+				std::cout << t[0].x << " " << t[0].y << " " << std::endl;
 				// 两个三角形
 				for (int i = 0; i < 3; i++)
 				{
 					glm::vec3 normal;
 					normal = glm::normalize(p[i] - center);
-					point_attribute.insert(point_attribute.end(), {p[i].x, p[i].y, p[i].z});
-					point_attribute.insert(point_attribute.end(), {normal.x, normal.y, normal.z});
+					Attribute attribute{p[i], normal, t[i]};
+					point_attribute.emplace_back(attribute);
 				}
 				for (int i = 2; i < 5; i++)
 				{
 					glm::vec3 normal;
 					normal = glm::normalize(p[i % 4] - center);
-					point_attribute.insert(point_attribute.end(), {p[i % 4].x, p[i % 4].y, p[i % 4].z});
-					point_attribute.insert(point_attribute.end(), {normal.x, normal.y, normal.z});
+					Attribute attribute{p[i % 4], normal, t[i % 4]};
+					point_attribute.emplace_back(attribute);
 				}				
 			}
 		}
@@ -63,33 +71,35 @@ class Sphere
 
 		glBindVertexArray(VAO);
 		glBindBuffer(GL_ARRAY_BUFFER, VBO);
-		glBufferData(GL_ARRAY_BUFFER, point_attribute.size() * sizeof(float) + sizeof(Material), point_attribute.data(), GL_STATIC_DRAW);
+		glBufferData(GL_ARRAY_BUFFER, point_attribute.size() * sizeof(Attribute) + sizeof(Material), point_attribute.data(), GL_STATIC_DRAW);
 
 		glBindBuffer(GL_UNIFORM_BUFFER, uniformBlockIndex);
 		glBufferData(GL_UNIFORM_BUFFER, sizeof(Material), (void*)(&material), GL_STATIC_DRAW);
 
 		// position attribute
-		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
+		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Attribute), (void*)offsetof(Attribute, pos));
 		glEnableVertexAttribArray(0);
 		// normal attribute
-		glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(float)));
+		glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Attribute), (void*)offsetof(Attribute, normal));
 		glEnableVertexAttribArray(1);
 	}
 
 public:
-	Sphere(glm::vec3 center, float radius, Material& material)
+	Sphere(glm::vec3 center, float radius, Material& material, int texture = -1)
 	{
 		this->center = center;
 		this->radius = radius;
 		this->material = std::move(material);
+		this->texture = texture;
 		init();
 	}
 
 	void paint()
 	{
+		if 
 		glBindVertexArray(VAO);
 		glBindBufferRange(GL_UNIFORM_BUFFER, 0, uniformBlockIndex, 0, sizeof(Material));
-		glDrawArrays(GL_TRIANGLES, 0, point_attribute.size() / 6);
+		glDrawArrays(GL_TRIANGLES, 0, point_attribute.size());
 		glBindVertexArray(0);
 	}
 };

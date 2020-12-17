@@ -17,6 +17,7 @@ constexpr auto EPSILON = 0.01;
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void mouse_callback(GLFWwindow* window, double xpos, double ypos);
 void processInput(GLFWwindow* window);
+unsigned int init_texture(string path);
 // settings
 const unsigned int SCR_WIDTH = 800;
 const unsigned int SCR_HEIGHT = 600;
@@ -69,6 +70,7 @@ int main()
 	// -----------------------------------	
 	Shader ourShader("shader.vs", "shader.fs");
 	Model ourModel("Resources/car/Low-Poly-Racing-Car.obj");
+	unsigned int earth_texture = init_texture("Texture/earth.jpg");
 
 	// Sun
 	Material material;
@@ -76,7 +78,7 @@ int main()
 	material.kd = glm::vec4(2 * 247.0f / 255, 2 * 92.0f / 255, 2 * 47.0f / 255, 1);
 	material.ks = glm::vec4(0.5, 0.5, 0.5, 1);
 	material.shinness = 32;
-	Sphere sun(glm::vec3(0, 0, 0), 10, material);
+	Sphere sun(glm::vec3(0, 0, 0), 10, material, earth_texture);
 
 	// Earth
 	material.ka = glm::vec4(0.4, 0.4, 0.4, 1);
@@ -241,4 +243,31 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 	// make sure the viewport matches the new window dimensions; note that width and 
 	// height will be significantly larger than specified on retina displays.
 	glViewport(0, 0, width, height);
+}
+
+unsigned int init_texture(string path)
+{
+	if (path.size() == 0)
+		return;
+	unsigned int texture;
+	glGenTextures(1, &texture);
+	glBindTexture(GL_TEXTURE_2D, texture);
+	// 为当前绑定的纹理对象设置环绕、过滤方式
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	// 加载并生成纹理
+	int width, height, nrChannels;
+	unsigned char* data = stbi_load(path.c_str(), &width, &height, &nrChannels, 0);
+	if (data)
+	{
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+		glGenerateMipmap(GL_TEXTURE_2D);
+	} else
+	{
+		std::cout << "Failed to load texture" << std::endl;
+	}
+	stbi_image_free(data);
+	return texture;
 }

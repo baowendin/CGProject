@@ -66,6 +66,5 @@ public:
 		glBindVertexArray(VAO);
 		glDrawArrays(GL_TRIANGLES, 0, 3 * sector_num);
 		glBindVertexArray(0);
-
 	}
 };
