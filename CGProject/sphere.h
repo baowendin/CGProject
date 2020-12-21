@@ -1,10 +1,11 @@
 #pragma once
 #include "common.h"
+#include "object.h"
 #include "material.h"
 #define _USE_MATH_DEFINES
 #include <math.h>
 #include<vector>
-class Sphere
+class Sphere : Object
 {
 	glm::vec3 center;
 	Material material;
@@ -40,13 +41,12 @@ class Sphere
 				p[0] = points[phi * theta_num + theta];
 				p[1] = points[phi * theta_num + (theta + 1) % theta_num];
 				p[2] = points[(phi + 1) * theta_num + (theta + 1) % theta_num];
-				p[3] = points[(phi + 1) * theta_num + theta];	
+				p[3] = points[(phi + 1) * theta_num + theta];
 
 				t[0] = {(float)theta / theta_num, (float)phi / phi_num};
 				t[1] = {(float)(theta + 1) / theta_num, (float)phi / phi_num};
 				t[2] = {(float)(theta + 1) / theta_num, (float)(phi + 1) / phi_num};
 				t[3] = {(float)theta / theta_num, (float)(phi + 1) / phi_num};
-				std::cout << t[0].x << " " << t[0].y << " " << std::endl;
 				// 两个三角形
 				for (int i = 0; i < 3; i++)
 				{
@@ -61,7 +61,7 @@ class Sphere
 					normal = glm::normalize(p[i % 4] - center);
 					Attribute attribute{p[i % 4], normal, t[i % 4]};
 					point_attribute.emplace_back(attribute);
-				}				
+				}
 			}
 		}
 
@@ -82,6 +82,9 @@ class Sphere
 		// normal attribute
 		glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Attribute), (void*)offsetof(Attribute, normal));
 		glEnableVertexAttribArray(1);
+		// texture attribute 
+		glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Attribute), (void*)(offsetof(Attribute, texture)));
+		glEnableVertexAttribArray(2);
 	}
 
 public:
@@ -96,10 +99,25 @@ public:
 
 	void paint()
 	{
-		if 
+		if (texture != -1)
+		{
+			glActiveTexture(GL_TEXTURE0);
+			glBindTexture(GL_TEXTURE_2D, texture);
+		}
+		else
+		{
+			glActiveTexture(GL_TEXTURE0);
+			glBindTexture(GL_TEXTURE_2D, 0);
+		}
+
 		glBindVertexArray(VAO);
 		glBindBufferRange(GL_UNIFORM_BUFFER, 0, uniformBlockIndex, 0, sizeof(Material));
 		glDrawArrays(GL_TRIANGLES, 0, point_attribute.size());
 		glBindVertexArray(0);
+	}
+
+	BoundingBox get_boundingbox()
+	{
+		return BoundingBox(center, glm::vec3(radius, radius, radius));
 	}
 };

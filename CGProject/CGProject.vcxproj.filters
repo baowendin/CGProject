@@ -68,6 +68,18 @@
     <ClInclude Include="material.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="camera.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="skybox.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="boundingbox.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="object.h">
+      <Filter>头文件\model</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

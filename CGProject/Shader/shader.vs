@@ -14,7 +14,6 @@ out vec3 Normal;
 out vec2 TexCoords;
 
 out vec4 Ambient;
-out vec4 Diffuse;
 out vec4 Specular;
 out float Shinness;
  
@@ -30,7 +29,6 @@ void main()
 	Normal = mat3(transpose(inverse(model))) * aNormal;  
     TexCoords = aTexCoords;
 	Ambient = aAmbient;
-	Diffuse = aDiffuse;
 	Specular = aSpecular;
     Shinness = aShinness;
  	

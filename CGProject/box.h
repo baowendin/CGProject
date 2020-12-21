@@ -1,7 +1,7 @@
 #pragma once
 #include "common.h"
 #include<vector>
-static float vertices[] = {
+static float box_vertices[] = {
 	-0.5f, -0.5f, -0.5f,
 	0.5f, -0.5f, -0.5f,
 	0.5f, 0.5f, -0.5f,
@@ -63,7 +63,7 @@ public:
 		{
 			for (int j = 0; j < 3; j++)
 			{
-				data.push_back(vertices[i * 3 + j]);
+				data.push_back(box_vertices[i * 3 + j]);
 			}
 			data.push_back(color.x);
 			data.push_back(color.y);

@@ -95,7 +95,7 @@ public:
         glUniform1f(glGetUniformLocation(ID, name.c_str()), value);
     }
     // ------------------------------------------------------------------------
-    void setMatrix4f(const std::string& name, glm::mat4 trans) const
+    void setMat4(const std::string& name, glm::mat4 trans) const
     {
         glUniformMatrix4fv(glGetUniformLocation(ID, name.c_str()), 1, false, glm::value_ptr(trans));
     }
