@@ -48,7 +48,7 @@ private:
 	{
 		// read file via ASSIMP
 		Assimp::Importer importer;
-		const aiScene* scene = importer.ReadFile(path, aiProcess_Triangulate | aiProcess_GenSmoothNormals | aiProcess_FlipUVs | aiProcess_CalcTangentSpace);
+		const aiScene* scene = importer.ReadFile(path, aiProcess_Triangulate | aiProcess_FixInfacingNormals| aiProcess_GenSmoothNormals | aiProcess_FlipUVs | aiProcess_CalcTangentSpace);
 		// check for errors
 		if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) // if is Not Zero
 		{
@@ -158,7 +158,7 @@ private:
 			material->Get(AI_MATKEY_COLOR_DIFFUSE, color);
 			mat.kd = glm::vec4(color.r, color.g, color.b, 1.0);
 			material->Get(AI_MATKEY_COLOR_SPECULAR, color);
-			mat.ks = glm::vec4(color.r, color.g, color.b, 1.0);
+			mat.ks = glm::vec4(color.r, color.g, color.b, 1.0);	
 			material->Get(AI_MATKEY_SHININESS, shinness);
 			mat.shinness = shinness;
 			// 1. diffuse maps

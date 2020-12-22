@@ -15,6 +15,7 @@ out vec2 TexCoords;
 
 out vec4 Ambient;
 out vec4 Specular;
+out vec4 Diffuse;
 out float Shinness;
  
 uniform mat4 model;
@@ -28,6 +29,7 @@ void main()
     //Normal =vec3(projection * vec4(mat3(transpose(inverse(view * model))) * aNormal,0.0));  
 	Normal = mat3(transpose(inverse(model))) * aNormal;  
     TexCoords = aTexCoords;
+    Diffuse = aDiffuse;
 	Ambient = aAmbient;
 	Specular = aSpecular;
     Shinness = aShinness;

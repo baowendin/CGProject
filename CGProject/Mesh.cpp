@@ -1,4 +1,5 @@
 #include "mesh.h"
+#include <iostream>
 Mesh::Mesh(vector<Vertex> vertices, vector<unsigned int> indices, vector<Texture> textures, Material material)
 {
     this->vertices = std::move(vertices);
@@ -60,7 +61,7 @@ void Mesh::Draw(Shader& shader)
         else if (name == "texture_specular")
             number = std::to_string(specularNr++);
 
-        shader.setFloat(("material." + name + number).c_str(), i);
+        shader.setFloat((name + number).c_str(), i);
         glBindTexture(GL_TEXTURE_2D, textures[i].id);
     }
     glActiveTexture(GL_TEXTURE0); // Õâ¾ä ÐèÒªÂð

@@ -74,47 +74,16 @@ int main()
 
 	// build and compile our shader zprogram
 	// -----------------------------------	
-	Shader ourShader("Shader/shader.vs", "Shader/shader.fs");
-	Model ourModel("Resources/car/Low-Poly-Racing-Car.obj");
-	unsigned int earth_texture = init_texture("Texture/earth.jpg");
-	unsigned int mars_texture = init_texture("Texture/mars.jpg");
-	unsigned int moon_texture = init_texture("Texture/moon.jpg");
-	unsigned int sun_texture = init_texture("Texture/sun.jpg");
-
-	// Sun
-	Material material;
-	material.ka = glm::vec4(2.0f, 2.0f, 2.0f, 1);
-	material.kd = glm::vec4(2 * 247.0f / 255, 2 * 92.0f / 255, 2 * 47.0f / 255, 1);
-	material.ks = glm::vec4(0.5, 0.5, 0.5, 1);
-	material.shinness = 32;
-	Sphere sun(glm::vec3(0, 0, 0), 10, material, sun_texture);
-
-	// Earth
-	material.ka = glm::vec4(1, 1, 1, 1);
-	material.kd = glm::vec4(129.0f / 255, 199.0f / 255, 212.0f / 255, 1);
-	material.ks = glm::vec4(0.5, 0.5, 0.5, 1);
-	material.shinness = 32;
-	Sphere earth(glm::vec3(0, 0, 0), 3, material, earth_texture);
-
-	// Moon
-	material.ka = glm::vec4(1, 1, 1, 1);
-	material.kd = glm::vec4(186.0f / 255, 145.0f / 255, 50.0f / 255, 1);
-	material.ks = glm::vec4(0.5, 0.5, 0.5, 1);
-	material.shinness = 32;
-	Sphere moon(glm::vec3(0, 0, 0), 1, material, moon_texture);
-	// Mars
-	material.ka = glm::vec4(1, 1, 1, 1);
-	material.kd = glm::vec4(135.0f / 255, 102.0f / 255, 51.0f / 255, 1);
-	material.ks = glm::vec4(0.5, 0.5, 0.5, 1);
-	material.shinness = 32;
-	Sphere mars(glm::vec3(0, 0, 0), 5, material, mars_texture);
+	Shader ourShader("Shader/shader_texture.vs", "Shader/shader_texture.fs");
+	Model ourModel("Model/small_tree/unityexport.obj");
+	Model sky("Model/skybox/skybox.obj");
 
 	// Light
-	glm::vec3 lightPos = glm::vec3(0.0f, 0.0f, 0.0f);
+	glm::vec3 lightPos = glm::vec3(0.0f, 0.0f, 50.0f);
 	ourShader.use();
 	ourShader.setVec3("light.position", lightPos);
 	ourShader.setVec3("light.ambient", 0.5f, 0.5f, 0.5f);
-	ourShader.setVec3("light.diffuse", 0.9f, 0.9f, 0.9f); 
+	ourShader.setVec3("light.diffuse", 0.4f, 0.4f, 0.4f); 
 	ourShader.setVec3("light.specular", 0.1f, 0.1f, 0.1f);
 	ourShader.setInt("texture1", 0);
 
@@ -157,32 +126,16 @@ int main()
 		// projection matrix
 		glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
 		ourShader.setMat4("projection", projection);
-		// paint soloar system
-		glm::mat4 model;
-		ourShader.setMat4("model", model);
-		sun.paint();
-		model = glm::rotate(model, (float)glfwGetTime() * glm::radians(earth_rs), glm::vec3(0, 0, 1));
-		model = glm::translate(model, glm::vec3(23, 0, 0));
-		ourShader.setMat4("model", model);
-		earth.paint();
-		model = glm::rotate(model, (float)glfwGetTime() * glm::radians(moon_rs), glm::vec3(0, 0, 1));
-		model = glm::translate(model, glm::vec3(5, 0, 0));
-		ourShader.setMat4("model", model);
-		moon.paint();
-		model = glm::mat4(1.0f);
-		model = glm::rotate(model, (float)glfwGetTime() * glm::radians(mars_rs), glm::vec3(0, 0, 1));
-		model = glm::translate(model, glm::vec3(0, 35, 0));
-		ourShader.setMat4("model", model);
-		mars.paint();
-		skybox.Paint(camera, projection);
+		ourShader.setMat4("model", glm::mat4());
+		//ourModel.Draw(ourShader);
+		ourShader.setVec3("light.ambient", 1.0f, 1.0f, 1.0f);
+		ourShader.setVec3("light.diffuse", 0.0f, 0.0f, 0.0f);
+		sky.Draw(ourShader);		
+		//skybox.Paint(camera, projection);
 		glfwSwapBuffers(window);
 		glfwPollEvents();
 		time++;
 	}
-
-	// optional: de-allocate all resources once they've outlived their purpose:
-	// ------------------------------------------------------------------------
-
 
 	// glfw: terminate, clearing all previously allocated GLFW resources.
 	// ------------------------------------------------------------------

@@ -74,15 +74,13 @@ class Skybox
 	void load_texture(vector<string>& faces)
 	{
 		glGenTextures(1, &skyboxTexture);
-		cout << skyboxTexture << endl;
 		glBindTexture(GL_TEXTURE_CUBE_MAP, skyboxTexture);
 		int width, height, nrChannels;
 		unsigned char* data;
 
 		// ¼ÓÔØskyboxÊý¾Ý
 		for (unsigned int i = 0; i < faces.size(); i++)
-		{
-			std::cout << faces[i] << std::endl;
+		{	
 			data = stbi_load(faces[i].c_str(), &width, &height, &nrChannels, 0);
 			glTexImage2D(
 				GL_TEXTURE_CUBE_MAP_POSITIVE_X + i,
