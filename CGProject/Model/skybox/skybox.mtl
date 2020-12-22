@@ -1,0 +1,5 @@
+newmtl rpgpp_lt_sky_a
+Kd 1 1 1
+map_Kd rpgpp_lt_sky_a.png
+illum 2
+

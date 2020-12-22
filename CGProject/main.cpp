@@ -29,7 +29,7 @@ const unsigned int SCR_HEIGHT = 600;
 * timing setting is used to balance movement among different device
 * last time position is used to calculate movement 
 */ 
-Camera camera(glm::vec3(0.0f, 0.0f, 50.0f));
+Camera camera(glm::vec3(0.0f, 4.0f, 0.0f));
 // timing
 float deltaTime = 0.0f;	// time between current frame and last frame
 float lastFrame = 0.0f;
@@ -66,20 +66,23 @@ int main()
 	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
 	// glad: load all OpenGL function pointers
-	// ---------------------------------------
 	if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
 		std::cout << "Failed to initialize GLAD" << std::endl;
 		return -1;
 	}
 
 	// build and compile our shader zprogram
-	// -----------------------------------	
 	Shader ourShader("Shader/shader_texture.vs", "Shader/shader_texture.fs");
+
+	// Initalize model
 	Model ourModel("Model/small_tree/unityexport.obj");
 	Model sky("Model/skybox/skybox.obj");
+	Model ground("Model/ground/ground.obj");
+	Model house("Model/house/house.obj");
+	// TODO: add them into a vector which used for collision detect
 
 	// Light
-	glm::vec3 lightPos = glm::vec3(0.0f, 0.0f, 50.0f);
+	glm::vec3 lightPos = glm::vec3(0.0f, 50.0f, 0.0f);
 	ourShader.use();
 	ourShader.setVec3("light.position", lightPos);
 	ourShader.setVec3("light.ambient", 0.5f, 0.5f, 0.5f);
@@ -127,11 +130,23 @@ int main()
 		glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
 		ourShader.setMat4("projection", projection);
 		ourShader.setMat4("model", glm::mat4());
-		//ourModel.Draw(ourShader);
+
+		// 通过临时修改light属性，使得我们画出来的天空不会有一块长方形特别亮
 		ourShader.setVec3("light.ambient", 1.0f, 1.0f, 1.0f);
 		ourShader.setVec3("light.diffuse", 0.0f, 0.0f, 0.0f);
-		sky.Draw(ourShader);		
-		//skybox.Paint(camera, projection);
+		// sky.Draw(ourShader);	
+		// 调回light
+		ourShader.setVec3("light.ambient", 0.5f, 0.5f, 0.5f);
+		ourShader.setVec3("light.diffuse", 0.7f, 0.7f, 0.7f);
+
+		// 其他object绘制
+		ourShader.setMat4("model", glm::scale(glm::mat4(), glm::vec3(10, 10, 10)));
+		ground.Draw(ourShader);
+		ourShader.setMat4("model", glm::translate(glm::mat4(), glm::vec3(0, 5, 0)));
+		house.Draw(ourShader);
+
+		// skybox 绘制
+		skybox.Paint(camera, projection);
 		glfwSwapBuffers(window);
 		glfwPollEvents();
 		time++;
@@ -141,7 +156,7 @@ int main()
 	// ------------------------------------------------------------------
 	glfwTerminate();
 	return 0;
-}
+	}
 
 // process all input: query GLFW whether relevant keys are pressed/released this frame and react accordingly
 // ---------------------------------------------------------------------------------------------------------

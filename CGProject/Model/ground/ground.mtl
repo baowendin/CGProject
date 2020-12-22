@@ -1,0 +1,5 @@
+newmtl rpgpp_lt_mat_a
+Kd 1 1 1
+map_Kd rpgpp_lt_tex_a.png
+illum 2
+
