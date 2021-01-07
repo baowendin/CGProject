@@ -8,8 +8,13 @@
 #include "skybox.h"
 #include "camera.h"
 
+#include <fstream>
+#include "rapidjson/document.h"
+//#include "rapidjson/writer.h"
+#include "rapidjson/prettywriter.h"
+#include "rapidjson/stringbuffer.h"
+
 #include <vector>
-#include <filesystem>
 #include <iostream>
 
 
@@ -29,6 +34,9 @@ unsigned int init_texture(string path);
 
 //temp for test shadow mapping
 void renderQuad();
+
+//load model from json file
+void load_model(string path, vector<Model*>& collection);
 
 // window settings
 unsigned int SCR_WIDTH = 800;
@@ -92,6 +100,8 @@ int main()
 	Shader debugDepthQuad("Shader/debug_quad.vs", "Shader/debug_quad.fs");
 
 	// initalize model
+	load_model("app.json", model_collection);
+	/*
 	Model sky("Model/skybox/skybox.obj");
 	Model ground("Model/ground/ground.obj");
 	Model house("Model/house/house.obj");
@@ -100,6 +110,7 @@ int main()
 	model_collection.push_back(&ground);
 	model_collection.push_back(&house);
 	model_collection.push_back(&tree);
+	*/
 
 	// light
 	glm::vec3 lightPos = glm::vec3(10.0f, 20.0f, -20.0f);
@@ -164,7 +175,7 @@ int main()
 
 		// input
 		process_input(window);
-		
+
 		// Render depth of scene to a texture
 		// clear color and depth buffer
 		glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
@@ -192,24 +203,24 @@ int main()
 		// 用来测试深度纹理是否正确
 		glViewport(0, 0, SCR_WIDTH, SCR_HEIGHT);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		debugDepthQuad.use();		
+		debugDepthQuad.use();
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, depthMap);
 		renderQuad();
 		*/
-		
+
 		glViewport(0, 0, SCR_WIDTH, SCR_HEIGHT);
 		glm::mat4 view = camera.GetViewMatrix();
 		ourShader.use();
 		ourShader.setMat4("view", view);
 		// projection matrix
 		glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
-		ourShader.setMat4("projection", projection);	
+		ourShader.setMat4("projection", projection);
 		ourShader.setMat4("lightSpaceMatrix", lightSpaceMatrix);
 		// 设置阴影贴图
 		glActiveTexture(GL_TEXTURE1);
 		glBindTexture(GL_TEXTURE_2D, depthMap);
-		render_scene(ourShader, model_collection);			 
+		render_scene(ourShader, model_collection);
 		//// 通过临时修改light属性，使得我们画出来的天空不会有一块长方形特别亮
 		//ourShader.setBool("shadow_enabled", false);
 		//ourShader.setVec3("light.ambient", 1.0f, 1.0f, 1.0f);
@@ -218,12 +229,12 @@ int main()
 		//// 调回light
 		//ourShader.setVec3("light.ambient", 0.5f, 0.5f, 0.5f);		
 		//ourShader.setVec3("light.diffuse", 0.7f, 0.7f, 0.7f);
-		
 
-		
+
+
 		// skybox 绘制
 		skybox.Paint(camera, projection);
-		
+
 
 		glfwSwapBuffers(window);
 		glfwPollEvents();
@@ -322,15 +333,25 @@ unsigned int init_texture(string path)
 
 void render_scene(Shader& shader, vector<Model*>& collection)
 {
-	glCullFace(GL_FRONT);
+	/*
+	// glCullFace(GL_FRONT);
 	shader.setBool("shadow_enabled", true);
-	shader.setMat4("model", glm::scale(glm::mat4(), glm::vec3(10, 10, 10)));
+	collection[0]->scale = glm::vec3(10, 10, 10);
+	// shader.setMat4("model", glm::scale(glm::mat4(), glm::vec3(10, 10, 10)));
 	collection[0]->Draw(shader);
-	shader.setMat4("model", glm::translate(glm::mat4(), glm::vec3(0, 4.5, 0)));
+	collection[1]->translate = glm::vec3(0, 4.5, 0);
+	// shader.setMat4("model", glm::translate(glm::mat4(), glm::vec3(0, 4.5, 0)));
 	collection[1]->Draw(shader);
-	shader.setMat4("model", glm::translate(glm::mat4(), glm::vec3(10, 4, 0)));
+	collection[2]->translate = glm::vec3(10, 4, 0);
+	// shader.setMat4("model", glm::translate(glm::mat4(), glm::vec3(10, 4, 0)));
 	collection[2]->Draw(shader);
-	glCullFace(GL_BACK);
+	// glCullFace(GL_BACK);
+	*/
+	for (auto& item : collection)
+	{
+		shader.setBool("shadow_enabled", true);
+		item->Draw(shader);
+	}
 }
 
 // this part is used for testing shadow mapping 
@@ -362,4 +383,78 @@ void renderQuad()
 	glBindVertexArray(quadVAO);
 	glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 	glBindVertexArray(0);
+}
+void load_model(string path, vector<Model*>& collection)
+{
+	// 从文件读取Json到字符串
+	ifstream is;
+	is.open(path);
+	if (!is.is_open())
+	{
+		cout << "Can't Open App Json File!" << endl;
+		return;
+	}
+	string line;
+	string file_string((istreambuf_iterator<char>(is)), istreambuf_iterator<char>());
+	// 读取配置并生成Model List
+
+	rapidjson::Document dom;
+	if (!dom.Parse(file_string.c_str()).HasParseError())
+	{
+		if (dom.HasMember("objects") && dom["objects"].IsArray())
+		{
+			const rapidjson::Value& arr = dom["objects"];
+			for (int i = 0; i < arr.Size(); ++i)
+			{
+				const rapidjson::Value& item = arr[i];
+				// 获得文件路径
+				if (!item.HasMember("path"))
+				{
+					cout << "Item " << i << " doesn't contains path" << endl;
+					continue;
+				}
+				string path = item["path"].GetString();
+				Model* model = new Model(path);
+
+				//获取向量属性
+				vector<string> trans = {"scale", "translate", "rotate"};
+				for (auto& s : trans)
+				{
+					if (!item.HasMember(s.c_str()))
+						continue;
+					
+					float arr[3];
+					int size;
+					// 获取value
+					size = item[s.c_str()].Size();
+					if (size != 3)
+					{
+						cout << s << " size doesn't match" << endl;
+					}
+
+					for (int i = 0; i < 3; i++)
+					{
+						arr[i] = item[s.c_str()][i].GetDouble();
+					}
+					model->set_attribute(s, glm::vec3(arr[0], arr[1], arr[2]));
+				}
+
+				vector<string> float_attributes = {"angle"};
+				//获取旋转角度
+				for (auto attribute : float_attributes)
+				{
+					if (!item.HasMember(attribute.c_str()))
+						continue;
+					
+					float angle = (float)item[attribute.c_str()].GetDouble();
+					model->set_attribute(attribute, angle);
+
+				}
+
+				// 加入vector
+				collection.push_back(model);
+			}
+		}
+
+	}
 }

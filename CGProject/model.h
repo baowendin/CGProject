@@ -22,10 +22,14 @@ unsigned int TextureFromFile(const char* path, const string& directory, bool gam
 
 class Model
 {
+	glm::vec3 translate;
+	glm::vec3 scale;
+	float rotate_angle;
+	glm::vec3 rotate_around;
 public:
 	// model data 
 	vector<Texture> textures_loaded;	// stores all the textures loaded so far, optimization to make sure textures aren't loaded more than once.
-	vector<Mesh>    meshes;
+	vector<Mesh> meshes;	
 	string directory;
 	bool gammaCorrection;
 
@@ -33,11 +37,41 @@ public:
 	Model(string const& path, bool gamma = false): gammaCorrection(gamma)
 	{
 		loadModel(path);
+		
+		// 设置初始参数
+		scale = glm::vec3(1, 1, 1);
+		rotate_angle = 0;
+		translate = glm::vec3(0, 0, 0);
+		rotate_around = glm::vec3(0, 0, 1);
+	}
+
+	void set_attribute(string& attribute, glm::vec3 val)
+	{
+		if (attribute == "scale")
+			this->scale = val;
+		else if (attribute == "translate")
+			this->translate = val;
+		else if (attribute == "rotate")
+			this->rotate_around = val;
+		else
+			cout << "Can't recognize attribute: " << attribute << endl;
+	}
+
+	void set_attribute(string& attribute, float val)
+	{
+		if (attribute == "angle")
+			this->rotate_angle = val;
 	}
 
 	// draws the model, and thus all its meshes
 	void Draw(Shader& shader)
 	{
+		// 设置model矩阵
+		glm::mat4 model;
+		model = glm::scale(model, scale);
+		model = glm::translate(model, translate);
+		model = glm::rotate(model, rotate_angle, rotate_around);
+		shader.setMat4("model", model);
 		for (unsigned int i = 0; i < meshes.size(); i++)
 			meshes[i].Draw(shader);
 	}

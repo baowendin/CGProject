@@ -1,0 +1,16 @@
+{
+    "objects":[
+        {
+            "path" : "Model/ground/ground.obj",
+            "scale" : [10, 10, 10]
+        },
+        {
+            "path" : "Model/house/house.obj", 
+            "translate" : [0, 4.5, 0]
+        },
+        {
+            "path" :"Model/tree_1/tree_1.obj",
+            "translate" : [10, 4, 0]
+        }
+    ]
+}
