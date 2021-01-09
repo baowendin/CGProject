@@ -8,6 +8,8 @@
 #include "skybox.h"
 #include "camera.h"
 
+#include "mygui.h"
+
 #include <fstream>
 #include "rapidjson/document.h"
 //#include "rapidjson/writer.h"
@@ -55,6 +57,17 @@ float lastFrame = 0.0f;
 float lastX = SCR_WIDTH / 2.0f;
 float lastY = SCR_HEIGHT / 2.0f;
 bool first_mouse = true;
+bool enableMouseControl = true;
+//light
+float lightPosX = 10.0f;
+float lightPosY = 20.0f;
+float lightPosZ = -20.0f;
+glm::vec3 lightPos(lightPosX, lightPosY, lightPosZ);
+
+// gui is displayed
+bool displayGui = false;
+// status of escape for the last 2 frame
+int escapeKeyStatus[2] = {GLFW_RELEASE, GLFW_RELEASE};
 
 //vector to store models
 vector<Model*> model_collection;
@@ -113,7 +126,7 @@ int main()
 	*/
 
 	// light
-	glm::vec3 lightPos = glm::vec3(10.0f, 20.0f, -20.0f);
+	//glm::vec3 lightPos = glm::vec3(10.0f, 20.0f, -20.0f);
 	ourShader.use();
 	ourShader.setVec3("light.position", lightPos);
 	ourShader.setVec3("light.ambient", 0.5f, 0.5f, 0.5f);
@@ -164,6 +177,10 @@ int main()
 	debugDepthQuad.use();
 	debugDepthQuad.setInt("depthMap", 0);
 	unsigned int test_texture = init_texture("Texture/skybox/front.jpg");
+	
+	//init imgui
+	MyGui::init(window);
+
 	// render loop
 	// -----------	
 	while (!glfwWindowShouldClose(window))
@@ -175,6 +192,11 @@ int main()
 
 		// input
 		process_input(window);
+
+		MyGui::start();
+		if (displayGui)
+			MyGui::render();
+		lightPos = glm::vec3(lightPosX, lightPosY, lightPosZ);
 
 		// Render depth of scene to a texture
 		// clear color and depth buffer
@@ -212,6 +234,7 @@ int main()
 		glViewport(0, 0, SCR_WIDTH, SCR_HEIGHT);
 		glm::mat4 view = camera.GetViewMatrix();
 		ourShader.use();
+		ourShader.setVec3("light.position", lightPos);
 		ourShader.setMat4("view", view);
 		// projection matrix
 		glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
@@ -235,10 +258,15 @@ int main()
 		// skybox »æÖÆ
 		skybox.Paint(camera, projection);
 
+		// render 2D Gui last
+		if (displayGui)
+			ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
 		glfwSwapBuffers(window);
 		glfwPollEvents();
 	}
+
+	MyGui::end();
 
 	// glfw: terminate, clearing all previously allocated GLFW resources.
 	// ------------------------------------------------------------------
@@ -250,8 +278,20 @@ int main()
 // ---------------------------------------------------------------------------------------------------------
 void process_input(GLFWwindow* window)
 {
-	if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
-		glfwSetWindowShouldClose(window, true);
+	//old
+	//if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
+	//	glfwSetWindowShouldClose(window, true);
+
+	//	like "always@ (posedge escapeKeyStatus)"
+	escapeKeyStatus[1] = escapeKeyStatus[0];
+	escapeKeyStatus[0] = glfwGetKey(window, GLFW_KEY_ESCAPE);
+	if (escapeKeyStatus[1] == GLFW_RELEASE &&
+		escapeKeyStatus[0] == GLFW_PRESS) {
+		displayGui = !displayGui;
+		enableMouseControl = !enableMouseControl;
+		glfwSetInputMode(window, GLFW_CURSOR, enableMouseControl ?
+			GLFW_CURSOR_DISABLED : GLFW_CURSOR_NORMAL);
+	}
 
 	if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
 		camera.ProcessKeyboard(FORWARD, deltaTime);
@@ -282,7 +322,8 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos)
 	lastX = xpos;
 	lastY = ypos;
 
-	camera.ProcessMouseMovement(xoffset, yoffset);
+	if (enableMouseControl)
+		camera.ProcessMouseMovement(xoffset, yoffset);
 }
 
 // glfw: whenever the mouse scroll wheel scrolls, this callback is called
