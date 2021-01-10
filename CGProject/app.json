@@ -2,11 +2,13 @@
     "objects":[
         {
             "path" : "Model/ground/ground.obj",
-            "scale" : [10, 10, 10]
+            "scale" : [10, 10, 10],
+            "collision" : 0
         },
         {
             "path" : "Model/house/house.obj", 
-            "translate" : [0, 4.5, 0]
+            "translate" : [0, 4.5, 0],
+            "rotate" : [0, 1, 0]
         },
         {
             "path" :"Model/tree_1/tree_1.obj",

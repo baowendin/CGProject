@@ -43,6 +43,7 @@ public:
     float MovementSpeed;
     float MouseSensitivity;
     float Zoom;
+    vector<Model*>* collection;
 
     // constructor with vectors
     Camera(glm::vec3 position = glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f), float yaw = YAW, float pitch = PITCH): Front(glm::vec3(0.0f, 0.0f, -1.0f)), MovementSpeed(SPEED), MouseSensitivity(SENSITIVITY), Zoom(ZOOM)
@@ -73,18 +74,25 @@ public:
     void ProcessKeyboard(Camera_Movement direction, float deltaTime)
     {
         float velocity = MovementSpeed * deltaTime;
+        glm::vec3 tmp_Position = Position;
         if (direction == FORWARD)
-            Position += Front * velocity;
+            tmp_Position += Front * velocity;
         if (direction == BACKWARD)
-            Position -= Front * velocity;
+            tmp_Position -= Front * velocity;
         if (direction == LEFT)
-            Position -= Right * velocity;
+            tmp_Position -= Right * velocity;
         if (direction == RIGHT)
-            Position += Right * velocity;
+            tmp_Position += Right * velocity;
         if (direction == UP)
-            Position += Up * velocity;
+            tmp_Position += Up * velocity;
         if (direction == DOWN)
-            Position -= Up * velocity;
+            tmp_Position -= Up * velocity;
+
+        cout << tmp_Position.x << " " << tmp_Position.y << " " << tmp_Position.z << endl;
+        if (!OccurCollision(tmp_Position))
+        {
+            Position = tmp_Position;
+        }
     }
 
     // processes input received from a mouse input system. Expects the offset value in both the x and y direction.
@@ -118,6 +126,11 @@ public:
             Zoom = 45.0f;
     }
 
+    void set_collection(vector<Model*>* collection)
+    {
+        this->collection = collection;
+    }
+
 private:
     // calculates the front vector from the Camera's (updated) Euler Angles
     void updateCameraVectors()
@@ -131,6 +144,23 @@ private:
         // also re-calculate the Right and Up vector
         Right = glm::normalize(glm::cross(Front, WorldUp));  // normalize the vectors, because their length gets closer to 0 the more you look up or down which results in slower movement.
         Up = glm::normalize(glm::cross(Right, Front));
+    }
+
+    bool OccurCollision(glm::vec3 pos)
+    {
+        for (auto& object : *collection)
+        {
+            BoundingBox& box = object->boundingbox;
+            if (pos.x > box.max_pos.x || pos.x < box.min_pos.x)
+                continue;
+            if (pos.y > box.max_pos.y || pos.y < box.min_pos.y)
+                continue;
+            if (pos.z - 1 > box.max_pos.z || pos.z + 1 < box.min_pos.z)
+                continue;
+            return true;
+        }
+        
+        return false;
     }
 };
 #endif

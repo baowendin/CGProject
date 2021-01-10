@@ -9,6 +9,7 @@
 
 #include "mesh.h"
 #include "shader.h"
+#include "boundingbox.h"
 
 #include <string>
 #include <fstream>
@@ -16,6 +17,7 @@
 #include <iostream>
 #include <map>
 #include <vector>
+#include <algorithm>
 using namespace std;
 
 unsigned int TextureFromFile(const char* path, const string& directory, bool gamma = false);
@@ -26,13 +28,15 @@ class Model
 	glm::vec3 scale;
 	float rotate_angle;
 	glm::vec3 rotate_around;
+
 public:
 	// model data 
 	vector<Texture> textures_loaded;	// stores all the textures loaded so far, optimization to make sure textures aren't loaded more than once.
 	vector<Mesh> meshes;	
 	string directory;
 	bool gammaCorrection;
-
+	bool collision = true;
+	BoundingBox boundingbox;
 	// constructor, expects a filepath to a 3D model.
 	Model(string const& path, bool gamma = false): gammaCorrection(gamma)
 	{
@@ -63,13 +67,34 @@ public:
 			this->rotate_angle = val;
 	}
 
+	void update_boundingbox()
+	{
+		glm::mat4 trans;
+		trans = glm::translate(trans, translate);
+		trans = glm::scale(trans, scale);
+		trans = glm::rotate(trans, rotate_angle, rotate_around);
+		for (auto& mesh : meshes)
+		{
+			for (auto& vertice : mesh.vertices)
+			{
+				glm::vec4 tmp = trans* glm::vec4(vertice.Position, 1.0);
+				boundingbox.max_pos.x = max(tmp.x, boundingbox.max_pos.x);
+				boundingbox.max_pos.y = max(tmp.y, boundingbox.max_pos.y);
+				boundingbox.max_pos.z = max(tmp.z, boundingbox.max_pos.z);
+				boundingbox.min_pos.x = min(tmp.x, boundingbox.min_pos.x);
+				boundingbox.min_pos.y = min(tmp.y, boundingbox.min_pos.y);
+				boundingbox.min_pos.z = min(tmp.z, boundingbox.min_pos.z);
+			}
+		}
+	}
+
 	// draws the model, and thus all its meshes
 	void Draw(Shader& shader)
 	{
 		// …Ë÷√modelæÿ’Û
-		glm::mat4 model;
-		model = glm::scale(model, scale);
+		glm::mat4 model;	
 		model = glm::translate(model, translate);
+		model = glm::scale(model, scale);
 		model = glm::rotate(model, rotate_angle, rotate_around);
 		shader.setMat4("model", model);
 		for (unsigned int i = 0; i < meshes.size(); i++)

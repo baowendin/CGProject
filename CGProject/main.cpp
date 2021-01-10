@@ -49,7 +49,7 @@ unsigned int SCR_HEIGHT = 600;
 * timing setting is used to balance movement among different device
 * last time position is used to calculate movement
 */
-Camera camera(glm::vec3(0.0f, 5.0f, 0.0f));
+Camera camera(glm::vec3(10.0f, 7.0f, 10.0f));
 // timing
 float deltaTime = 0.0f;	// time between current frame and last frame
 float lastFrame = 0.0f;
@@ -114,6 +114,7 @@ int main()
 
 	// initalize model
 	load_model("app.json", model_collection);
+	camera.set_collection(&model_collection);
 	/*
 	Model sky("Model/skybox/skybox.obj");
 	Model ground("Model/ground/ground.obj");
@@ -489,10 +490,21 @@ void load_model(string path, vector<Model*>& collection)
 					
 					float angle = (float)item[attribute.c_str()].GetDouble();
 					model->set_attribute(attribute, angle);
-
 				}
 
+				//是否加入碰撞检测
+				if (item.HasMember("collision"))
+				{
+					int flag = item["collision"].GetInt();
+					if (flag == 0)
+						model->collision = false;
+					else
+						model->collision = true;
+				}
 				// 加入vector
+				model->update_boundingbox();
+				cout << model->boundingbox.max_pos.x << " " << model->boundingbox.max_pos.y << " " << model->boundingbox.max_pos.z << " " << endl;
+				cout << model->boundingbox.min_pos.x << " " << model->boundingbox.min_pos.y << " " << model->boundingbox.min_pos.z << " " << endl;
 				collection.push_back(model);
 			}
 		}

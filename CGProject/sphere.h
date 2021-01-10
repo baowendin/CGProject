@@ -115,9 +115,4 @@ public:
 		glDrawArrays(GL_TRIANGLES, 0, point_attribute.size());
 		glBindVertexArray(0);
 	}
-
-	BoundingBox get_boundingbox()
-	{
-		return BoundingBox(center, glm::vec3(radius, radius, radius));
-	}
 };
