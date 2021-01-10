@@ -43,10 +43,11 @@ public:
     float MovementSpeed;
     float MouseSensitivity;
     float Zoom;
+    bool handle_collision;
     vector<Model*>* collection;
 
     // constructor with vectors
-    Camera(glm::vec3 position = glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f), float yaw = YAW, float pitch = PITCH): Front(glm::vec3(0.0f, 0.0f, -1.0f)), MovementSpeed(SPEED), MouseSensitivity(SENSITIVITY), Zoom(ZOOM)
+    Camera(glm::vec3 position = glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f), float yaw = YAW, float pitch = PITCH): Front(glm::vec3(0.0f, 0.0f, -1.0f)), MovementSpeed(SPEED), MouseSensitivity(SENSITIVITY), Zoom(ZOOM), handle_collision(true)
     {
         Position = position;
         WorldUp = up;
@@ -55,7 +56,7 @@ public:
         updateCameraVectors();
     }
     // constructor with scalar values
-    Camera(float posX, float posY, float posZ, float upX, float upY, float upZ, float yaw, float pitch): Front(glm::vec3(0.0f, 0.0f, -1.0f)), MovementSpeed(SPEED), MouseSensitivity(SENSITIVITY), Zoom(ZOOM)
+    Camera(float posX, float posY, float posZ, float upX, float upY, float upZ, float yaw, float pitch): Front(glm::vec3(0.0f, 0.0f, -1.0f)), MovementSpeed(SPEED), MouseSensitivity(SENSITIVITY), Zoom(ZOOM), handle_collision(true)
     {
         Position = glm::vec3(posX, posY, posZ);
         WorldUp = glm::vec3(upX, upY, upZ);
@@ -88,7 +89,7 @@ public:
         if (direction == DOWN)
             tmp_Position -= Up * velocity;
 
-        cout << tmp_Position.x << " " << tmp_Position.y << " " << tmp_Position.z << endl;
+        //cout << tmp_Position.x << " " << tmp_Position.y << " " << tmp_Position.z << endl;
         if (!OccurCollision(tmp_Position))
         {
             Position = tmp_Position;
@@ -131,6 +132,11 @@ public:
         this->collection = collection;
     }
 
+    void setCollision(bool value)
+    {
+        this->handle_collision = value;
+    }
+
 private:
     // calculates the front vector from the Camera's (updated) Euler Angles
     void updateCameraVectors()
@@ -148,6 +154,8 @@ private:
 
     bool OccurCollision(glm::vec3 pos)
     {
+        if (!handle_collision)
+            return false;
         for (auto& object : *collection)
         {
             if (!object->handle_collision)

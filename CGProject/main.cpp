@@ -115,6 +115,7 @@ int main()
 	// initalize model
 	load_model("app.json", model_collection);
 	camera.set_collection(&model_collection);
+	camera.setCollision(false);
 	/*
 	Model sky("Model/skybox/skybox.obj");
 	Model ground("Model/ground/ground.obj");
@@ -194,7 +195,6 @@ int main()
 		// input
 		process_input(window);
 
-		MyGui::start();
 		if (displayGui)
 			MyGui::render();
 		lightPos = glm::vec3(lightPosX, lightPosY, lightPosZ);
@@ -206,8 +206,8 @@ int main()
 		// render depth of scene to texture (from light's perspective)
 		glm::mat4 lightProjection, lightView;
 		glm::mat4 lightSpaceMatrix;
-		float near_plane = 0, far_plane = 100;
-		lightProjection = glm::ortho(-20.0f, 20.0f, -20.0f, 20.0f, near_plane, far_plane);
+		float near_plane = 0.0f, far_plane = 1000.0f;
+		lightProjection = glm::ortho(-100.0f, 100.0f, -100.0f, 100.0f, near_plane, far_plane);
 		lightView = glm::lookAt(lightPos, glm::vec3(0, 0, 0), glm::vec3(0.0, 0.0, 1.0));
 		lightSpaceMatrix = lightProjection * lightView;
 		// send matrix into shader
@@ -238,7 +238,7 @@ int main()
 		ourShader.setVec3("light.position", lightPos);
 		ourShader.setMat4("view", view);
 		// projection matrix
-		glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
+		glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 1000.0f);
 		ourShader.setMat4("projection", projection);
 		ourShader.setMat4("lightSpaceMatrix", lightSpaceMatrix);
 		// …Ë÷√“ı”∞Ã˘Õº
@@ -273,6 +273,12 @@ int main()
 	// ------------------------------------------------------------------
 	glfwTerminate();
 	return 0;
+}
+
+void reload() {
+	model_collection.clear();
+	load_model("app.json", model_collection);
+	camera.set_collection(&model_collection);
 }
 
 // process all input: query GLFW whether relevant keys are pressed/released this frame and react accordingly

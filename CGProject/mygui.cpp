@@ -14,23 +14,24 @@ void MyGui::init(GLFWwindow *_window) {
 	ImGui_ImplOpenGL3_Init("#version 330");
 }
 
-void MyGui::start() {
-	ImGui_ImplOpenGL3_NewFrame();
-	ImGui_ImplGlfw_NewFrame();
-	ImGui::NewFrame();
-}
-
 extern float lightPosX;
 extern float lightPosY;
 extern float lightPosZ;
+void reload();
 void MyGui::render() {
+	ImGui_ImplOpenGL3_NewFrame();
+	ImGui_ImplGlfw_NewFrame();
+	ImGui::NewFrame();
+
 	ImGui::Begin("Settings");
 	ImGui::Text("Light Position");
-	ImGui::SliderFloat("x:", &lightPosX, -20.0f, 20.0f);
-	ImGui::SliderFloat("y:", &lightPosY, -20.0f, 20.0f);
-	ImGui::SliderFloat("z:", &lightPosZ, -20.0f, 20.0f);
+	ImGui::SliderFloat("x:", &lightPosX, -100.0f, 100.0f);
+	ImGui::SliderFloat("y:", &lightPosY, -0.0f, 100.0f);
+	ImGui::SliderFloat("z:", &lightPosZ, -100.0f, 100.0f);
 	if (ImGui::Button("Quit"))
 		glfwSetWindowShouldClose(window, true);
+	if (ImGui::Button("ReloadModel"))
+		reload();
 	ImGui::End();
 
 	ImGui::Render();
