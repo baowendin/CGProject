@@ -35,7 +35,7 @@ public:
 	vector<Mesh> meshes;	
 	string directory;
 	bool gammaCorrection;
-	bool collision = true;
+	bool handle_collision = true;
 	BoundingBox boundingbox;
 	// constructor, expects a filepath to a 3D model.
 	Model(string const& path, bool gamma = false): gammaCorrection(gamma)

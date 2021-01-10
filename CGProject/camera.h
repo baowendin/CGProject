@@ -150,6 +150,8 @@ private:
     {
         for (auto& object : *collection)
         {
+            if (!object->handle_collision)
+                continue;
             BoundingBox& box = object->boundingbox;
             if (pos.x > box.max_pos.x || pos.x < box.min_pos.x)
                 continue;

@@ -3,7 +3,7 @@
         {
             "path" : "Model/ground/ground.obj",
             "scale" : [10, 10, 10],
-            "collision" : 0
+            "collision" : 1
         },
         {
             "path" : "Model/house/house.obj", 

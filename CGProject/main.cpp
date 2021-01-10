@@ -497,9 +497,9 @@ void load_model(string path, vector<Model*>& collection)
 				{
 					int flag = item["collision"].GetInt();
 					if (flag == 0)
-						model->collision = false;
+						model->handle_collision = false;
 					else
-						model->collision = true;
+						model->handle_collision = true;
 				}
 				// ¼ÓÈëvector
 				model->update_boundingbox();
