@@ -174,12 +174,13 @@ int main()
 
 	// 其他OpenGL选项
 	glEnable(GL_DEPTH_TEST);
+	glEnable(GL_CULL_FACE);
 	glCullFace(GL_BACK);
 
 	debugDepthQuad.use();
 	debugDepthQuad.setInt("depthMap", 0);
 	unsigned int test_texture = init_texture("Texture/skybox/front.jpg");
-	
+
 	//init imgui
 	MyGui::init(window);
 
