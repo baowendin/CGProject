@@ -115,7 +115,10 @@ int main()
 	// initalize model
 	load_model("app.json", model_collection);
 	camera.set_collection(&model_collection);
+#ifdef _DEBUG
 	camera.setCollision(false);
+#endif	// _DEBUG
+
 	/*
 	Model sky("Model/skybox/skybox.obj");
 	Model ground("Model/ground/ground.obj");
@@ -510,9 +513,11 @@ void load_model(string path, vector<Model*>& collection)
 				}
 				// ¼ÓÈëvector
 				model->update_boundingbox();
+				collection.push_back(model);
+#ifdef _DEBUG
 				cout << model->boundingbox.max_pos.x << " " << model->boundingbox.max_pos.y << " " << model->boundingbox.max_pos.z << " " << endl;
 				cout << model->boundingbox.min_pos.x << " " << model->boundingbox.min_pos.y << " " << model->boundingbox.min_pos.z << " " << endl;
-				collection.push_back(model);
+#endif
 			}
 		}
 
