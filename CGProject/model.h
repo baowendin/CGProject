@@ -69,10 +69,7 @@ public:
 
 	void update_boundingbox()
 	{
-		glm::mat4 trans;
-		trans = glm::translate(trans, translate);
-		trans = glm::scale(trans, scale);
-		trans = glm::rotate(trans, rotate_angle, rotate_around);
+		glm::mat4 trans = getModelMatrix();
 		for (auto& mesh : meshes)
 		{
 			for (auto& vertice : mesh.vertices)
@@ -91,17 +88,21 @@ public:
 	// draws the model, and thus all its meshes
 	void Draw(Shader& shader)
 	{
-		// …Ë÷√modelæÿ’Û
-		glm::mat4 model;	
-		model = glm::translate(model, translate);
-		model = glm::scale(model, scale);
-		model = glm::rotate(model, rotate_angle, rotate_around);
-		shader.setMat4("model", model);
+		shader.setMat4("model", getModelMatrix());
 		for (unsigned int i = 0; i < meshes.size(); i++)
 			meshes[i].Draw(shader);
 	}
 
 private:
+	// …Ë÷√modelæÿ’Û
+	glm::mat4 getModelMatrix() {
+		glm::mat4 model;
+		model = glm::translate(model, translate);
+		model = glm::scale(model, scale);
+		model = glm::rotate(model, glm::radians(rotate_angle), rotate_around);
+		return model;
+	}
+
 	// loads a model with supported ASSIMP extensions from file and stores the resulting meshes in the meshes vector.
 	void loadModel(string const& path)
 	{

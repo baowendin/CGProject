@@ -8,8 +8,6 @@
 namespace MyGui {
 	void init(GLFWwindow *window);
 
-	void start();
-
 	void render();
 
 	void end();

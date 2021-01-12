@@ -115,6 +115,10 @@ int main()
 	// initalize model
 	load_model("app.json", model_collection);
 	camera.set_collection(&model_collection);
+#ifdef _DEBUG
+	camera.setCollision(false);
+#endif	// _DEBUG
+
 	/*
 	Model sky("Model/skybox/skybox.obj");
 	Model ground("Model/ground/ground.obj");
@@ -173,12 +177,13 @@ int main()
 
 	// 其他OpenGL选项
 	glEnable(GL_DEPTH_TEST);
+	glEnable(GL_CULL_FACE);
 	glCullFace(GL_BACK);
 
 	debugDepthQuad.use();
 	debugDepthQuad.setInt("depthMap", 0);
 	unsigned int test_texture = init_texture("Texture/skybox/front.jpg");
-	
+
 	//init imgui
 	MyGui::init(window);
 
@@ -194,7 +199,6 @@ int main()
 		// input
 		process_input(window);
 
-		MyGui::start();
 		if (displayGui)
 			MyGui::render();
 		lightPos = glm::vec3(lightPosX, lightPosY, lightPosZ);
@@ -206,8 +210,8 @@ int main()
 		// render depth of scene to texture (from light's perspective)
 		glm::mat4 lightProjection, lightView;
 		glm::mat4 lightSpaceMatrix;
-		float near_plane = 0, far_plane = 100;
-		lightProjection = glm::ortho(-20.0f, 20.0f, -20.0f, 20.0f, near_plane, far_plane);
+		float near_plane = 0.0f, far_plane = 1000.0f;
+		lightProjection = glm::ortho(-100.0f, 100.0f, -100.0f, 100.0f, near_plane, far_plane);
 		lightView = glm::lookAt(lightPos, glm::vec3(0, 0, 0), glm::vec3(0.0, 0.0, 1.0));
 		lightSpaceMatrix = lightProjection * lightView;
 		// send matrix into shader
@@ -238,7 +242,7 @@ int main()
 		ourShader.setVec3("light.position", lightPos);
 		ourShader.setMat4("view", view);
 		// projection matrix
-		glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
+		glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 1000.0f);
 		ourShader.setMat4("projection", projection);
 		ourShader.setMat4("lightSpaceMatrix", lightSpaceMatrix);
 		// 设置阴影贴图
@@ -273,6 +277,12 @@ int main()
 	// ------------------------------------------------------------------
 	glfwTerminate();
 	return 0;
+}
+
+void reload() {
+	model_collection.clear();
+	load_model("app.json", model_collection);
+	camera.set_collection(&model_collection);
 }
 
 // process all input: query GLFW whether relevant keys are pressed/released this frame and react accordingly
@@ -503,9 +513,11 @@ void load_model(string path, vector<Model*>& collection)
 				}
 				// 加入vector
 				model->update_boundingbox();
+				collection.push_back(model);
+#ifdef _DEBUG
 				cout << model->boundingbox.max_pos.x << " " << model->boundingbox.max_pos.y << " " << model->boundingbox.max_pos.z << " " << endl;
 				cout << model->boundingbox.min_pos.x << " " << model->boundingbox.min_pos.y << " " << model->boundingbox.min_pos.z << " " << endl;
-				collection.push_back(model);
+#endif
 			}
 		}
 
