@@ -30,29 +30,30 @@
 
 比如树叶摇动这些
 
-1. 其他
-
-如Skybox，光照可编辑。还有些没有想到
-
- 
 
 **DONE**
 
 1. 模型加载 + JSON读取
 2. FPS相机
-3. 光照
+3. Phong光照模型
 4. Skybox（2种）
 5. Shadow Mapping
+6. GUI（光源可编辑）
+7. Shadow Mapping
+
+**流程**
+
+![](pic/流程.png)
 
  **目前效果** 
 
-![image-20210107092623191](C:\Users\76980\AppData\Roaming\Typora\typora-user-images\image-20210107092623191.png)
+![image-20210107092623191](pic/成果.png)
 
 ​	操作：WASD移动，QE上下，滚轮控制远近
 
-**TODO LIST**
+**一些细节**
 
-1. 碰撞检测(没时间可不做)
+1. 碰撞检测
 
 （1）基本思路：由于我们的人物视作在2D的平面移动，所以我们可以通过长方形记录每个物体的size，然后通过translate、rotate和scale（这些可以在model里面增加成员变量实现）对长方形进行变换，最后在人物移动的时候计算是否有长方形的重叠。
 
