@@ -3,6 +3,16 @@
 
 **主要功能：**
 
+**已经实现的功能**
+1. 模型加载 + JSON读取
+2. FPS相机
+3. Phong光照模型
+4. Skybox（2种）
+5. Shadow Mapping
+6. GUI（光源可编辑）
+7. Shadow Mapping
+
+**一些思路**
 1. 模型加载：
 
 主要有2种途径：
@@ -32,17 +42,6 @@
 1. Animation（Optional）
 
 比如树叶摇动这些
-
-
-**DONE**
-
-1. 模型加载 + JSON读取
-2. FPS相机
-3. Phong光照模型
-4. Skybox（2种）
-5. Shadow Mapping
-6. GUI（光源可编辑）
-7. Shadow Mapping
 
 **流程**
 
